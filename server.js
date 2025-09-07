@@ -2,24 +2,27 @@ import express from 'express';
 import mysql from 'mysql2/promise';
 import cors from 'cors';
 
-// Load .env variables in development
-if (process.env.NODE_ENV !== 'production') {
-  import('dotenv').then(dotenv => dotenv.config());
-}
+import dotenv from "dotenv"
+dotenv.config({path : ".env.production"})
+
+const port = 5309; // This must be declared here
+// this is the EXPRESS server port
 
 const app = express();
-const port = process.env.PORT || 3006;
+
 
 app.use(cors());
 app.use(express.json());
 
+console.log("Connecting too ",  process.env.DB_DATABASE)
+
 const createDbConnection = async () => {
   return await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'scm_system',
-    port: process.env.DB_PORT || 3306
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD, // Update with your MySQL password
+    database: process.env.DB_DATABASE,
+    port: 3306
   });
 };
 
@@ -124,7 +127,7 @@ app.post('/api/suppliers', async (req, res) => {
   }
 });
 
-// Update a supplier (fixed query)
+// Update a supplier
 app.put('/api/suppliers/:id', async (req, res) => {
   const { id } = req.params;
   const { name, contact_info } = req.body;
@@ -160,9 +163,12 @@ app.delete('/api/suppliers/:id', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-  createDbConnection()
-    .then(() => console.log('MySQL connected'))
-    .catch(err => console.error('MySQL connection error:', err));
-});
+// app.listen(port, () => {
+//   console.log(`Express/ HTTP Server running on port ${port}`);
+//   createDbConnection()
+//     .then(() => console.log('MySQL connected'))
+//     .catch(err => console.error('MySQL connection error:', err));
+// });
+
+//Changed for vercel hosting 
+export default app
